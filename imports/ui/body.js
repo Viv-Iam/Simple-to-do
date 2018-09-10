@@ -34,4 +34,9 @@ Template.body.events({
     // Clear form
     target.text.value = '';
   },
+
+  // Add event handler for checkbox
+  'change .hide-completed input'(event, instance) {
+    instance.state.set('hideCompleted', event.target.checked);
+  },
 });
