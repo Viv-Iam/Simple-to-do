@@ -22,6 +22,11 @@ Template.body.helpers({
     // Otherwise, return all of the tasks
     return Tasks.find({}, { sort: { createdAt: -1 } });
  },
+
+    // Add incompleteCount helper to body
+    incompleteCount() {
+    return Tasks.find({ checked: { $ne: true } }).count();
+},
 });
 
 Template.body.events({
