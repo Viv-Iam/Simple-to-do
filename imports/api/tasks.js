@@ -30,10 +30,7 @@ Meteor.methods({
       text,
       createdAt: new Date(),
       owner: this.userId,
-      username: this.username,
-
-      // owner: Meteor.userId(),
-      // username: Meteor.user().username,
+      username: Meteor.users.findOne(this.userId).username,
     });
   },
   'tasks.remove'(taskId) {
@@ -51,7 +48,7 @@ Meteor.methods({
     check(setChecked, Boolean);
 
     const task = Tasks.findOne(taskId);
-    if (task.private && task.owner !== Meteor.userId()) {
+    if (task.private && task.owner !== this.userId) {
       // If the task is private, make sure only the owner can check it off
       throw new Meteor.Error('not-authorized');
     }

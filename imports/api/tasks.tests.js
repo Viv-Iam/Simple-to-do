@@ -2,24 +2,35 @@
 /* eslint-env mocha */
 
 import { Meteor } from 'meteor/meteor';
-import {
-  Random
-} from 'meteor/random';
-import {
-  assert
-} from 'chai';
-// import { Accounts } from 'meteor/accounts-base';
-
-import {
-  Tasks
-} from './tasks.js';
+import { Random } from 'meteor/random';
+import { assert } from 'chai';
+import { Accounts } from 'meteor/accounts-base';
+import { Tasks } from './tasks.js';
 
 //checks is running on the server side
 if (Meteor.isServer) {
   describe('Tasks', () => {
     describe('methods', () => {
-      const userId = Random.id();
-      let taskId;
+      // const userId = Random.id();
+      // let taskId;
+
+      const username ='vivian'
+      let taskId, userId;
+
+      before(() => {
+        //create user if not already created
+        const user = Meteor.users.findOne({username: username})
+        
+        if(!user) {
+          userId = Accounts.createUser({
+            'username': username,
+            'email': 'vivian.opondoh@gmail.com',
+            'password': '12345678'
+          })
+        } else {
+          userId = user._id
+        }
+      })
 
       beforeEach(() => {
         //remove all tasks
@@ -30,6 +41,7 @@ if (Meteor.isServer) {
           createdAt: new Date(),
           owner: userId,
           username: 'tmeasday',
+          checked: false
         });
       });
 
@@ -83,7 +95,7 @@ if (Meteor.isServer) {
 
       //write test shows that you can insert task
       it('can insert owned tasks', () => {
-        let text = "text"
+        const text = "text"
         // Find the internal implementation of the task method so we can
         // test it in isolation
         const insertTask = Meteor.server.method_handlers['tasks.insert'];
@@ -96,6 +108,29 @@ if (Meteor.isServer) {
 
         // Verify that the method does what we expected
         assert.equal(Tasks.find().count(), 2);
+      });
+
+       //write test shows that you cannot insert task if not logged in
+       it('cannot insert task if !loggedin', () => {
+        const text = "text"
+        notLoggedIn = ! this._id
+        // Find the internal implementation of the task method so we can
+        // test it in isolation
+        const insertTask = Meteor.server.method_handlers['tasks.insert'];
+
+        // Set up a fake method invocation that looks like what the method expects
+        const invocation = { notLoggedIn };
+
+        // verify that exception is thrown
+        assert.throws(function() {
+          
+        // Run test **there are some global variables that are local thus pass them*8
+        insertTask.apply(invocation, [text]);
+                    
+        }, Meteor.Error, /not.authorized/);
+        
+        // Verify that the method does what we expected
+        assert.equal(Tasks.find().count(), 1);
       });
 
        // *******************SETCHECKED****************
@@ -116,6 +151,34 @@ if (Meteor.isServer) {
         // Verify that the method does what we expected
         assert.equal(Tasks.find(taskId, { $set: { checked: true } }).count(), 1);
       });
+
+      //write test shows that you cannot setChecked task
+      it('cannot setChecked task', () => {
+
+        //set existing task private by updating the task
+        Tasks.update(taskId, { $set: { private: true } });
+
+        //generate id to rep another user
+        const anotheruserId = Random.id();
+        
+        // Find the internal implementation of the task method so we can
+        // test it in isolation
+        const setCheckedTask = Meteor.server.method_handlers['tasks.setChecked'];
+        
+        // Set up a fake method invocation that looks like what the method expects
+        const invocation = { 'userId': anotheruserId };
+
+         // verify that exception is thrown
+         assert.throws(function() {
+          
+        // Run test **there are some global variables that are local thus pass them*8
+        setCheckedTask.apply(invocation, [taskId, true]);
+                    
+        }, Meteor.Error, /not.authorized/);
+        
+        // Verify that the method does what we expected
+        assert.equal(Tasks.findOne(taskId).checked, false);
+        });
 
        // *******************SETTOPRIVATE****************
 
