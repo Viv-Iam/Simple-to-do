@@ -41,7 +41,8 @@ if (Meteor.isServer) {
           createdAt: new Date(),
           owner: userId,
           username: 'tmeasday',
-          checked: false
+          checked: false,
+          private: false
         });
       });
 
@@ -114,12 +115,15 @@ if (Meteor.isServer) {
        it('cannot insert task if !loggedin', () => {
         const text = "text"
 
+        //cannot use because not userId is not a boolean but a string
+        // notLoggedIn = ! this._id
+
         // Find the internal implementation of the task method so we can
         // test it in isolation
         const insertTask = Meteor.server.method_handlers['tasks.insert'];
 
         // Set up a fake method invocation that looks like what the method expects
-        const invocation = { };
+        const invocation = {  };
 
         // verify that exception is thrown
         assert.throws(function() {
@@ -168,8 +172,8 @@ if (Meteor.isServer) {
         // Set up a fake method invocation that looks like what the method expects
         const invocation = { 'userId': anotheruserId };
 
-         // verify that exception is thrown
-         assert.throws(function() {
+        // verify that exception is thrown
+        assert.throws(function() {
           
         // Run test **there are some global variables that are local thus pass them*8
         setCheckedTask.apply(invocation, [taskId, true]);
@@ -199,22 +203,30 @@ if (Meteor.isServer) {
         assert.equal(Tasks.find(taskId, { $set: { private: true } }).count(), 1);
       });
 
-        //write test shows that you can setToPrivate task
-        // it('can setToPrivate task', () => {
+        // write test shows that you can cannotsetToPrivate task
+        it('cannot setToPrivate task', () => {
+
+        //generate id to rep another user
+        const anotheruserId = Random.id();
           
-        // // Find the internal implementation of the task method so we can
-        // // test it in isolation
-        // const setToPrivateTask = Meteor.server.method_handlers['tasks.setPrivate'];
+        // Find the internal implementation of the task method so we can
+        // test it in isolation
+        const setToPrivateTask = Meteor.server.method_handlers['tasks.setPrivate'];
           
-        // // Set up a fake method invocation that looks like what the method expects
-        // const invocation = { userId };
+        // Set up a fake method invocation that looks like what the method expects
+        const invocation = { anotheruserId };
+
+        // verify that exception is thrown
+        assert.throws(function() {
           
-        // // Run the method with `this` set to the fake invocation
-        // setToPrivateTask.apply(invocation, [taskId, true]);
+        // Run test **there are some global variables that are local thus pass them*8
+        setToPrivateTask.apply(invocation, [taskId, true]);
+                    
+        }, Meteor.Error, /not.authorized/);
           
-        // // Verify that the method does what we expected
-        // assert.equal(Tasks.find(taskId, { $set: { private: true } }).count(), 1);
-        // });
+        // Verify that the method does what we expected
+        assert.equal(Tasks.findOne(taskId).private, false);
+        });
 
     });
   });
