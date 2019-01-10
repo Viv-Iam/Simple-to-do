@@ -214,7 +214,7 @@ if (Meteor.isServer) {
         const setToPrivateTask = Meteor.server.method_handlers['tasks.setPrivate'];
           
         // Set up a fake method invocation that looks like what the method expects
-        const invocation = { anotheruserId };
+        const invocation = { 'userId': anotheruserId };
 
         // verify that exception is thrown
         assert.throws(function() {
