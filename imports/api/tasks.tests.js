@@ -113,13 +113,13 @@ if (Meteor.isServer) {
        //write test shows that you cannot insert task if not logged in
        it('cannot insert task if !loggedin', () => {
         const text = "text"
-        notLoggedIn = ! this._id
+
         // Find the internal implementation of the task method so we can
         // test it in isolation
         const insertTask = Meteor.server.method_handlers['tasks.insert'];
 
         // Set up a fake method invocation that looks like what the method expects
-        const invocation = { notLoggedIn };
+        const invocation = { };
 
         // verify that exception is thrown
         assert.throws(function() {
@@ -198,6 +198,23 @@ if (Meteor.isServer) {
         // Verify that the method does what we expected
         assert.equal(Tasks.find(taskId, { $set: { private: true } }).count(), 1);
       });
+
+        //write test shows that you can setToPrivate task
+        // it('can setToPrivate task', () => {
+          
+        // // Find the internal implementation of the task method so we can
+        // // test it in isolation
+        // const setToPrivateTask = Meteor.server.method_handlers['tasks.setPrivate'];
+          
+        // // Set up a fake method invocation that looks like what the method expects
+        // const invocation = { userId };
+          
+        // // Run the method with `this` set to the fake invocation
+        // setToPrivateTask.apply(invocation, [taskId, true]);
+          
+        // // Verify that the method does what we expected
+        // assert.equal(Tasks.find(taskId, { $set: { private: true } }).count(), 1);
+        // });
 
     });
   });
