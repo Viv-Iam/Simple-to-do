@@ -11,8 +11,6 @@ import { Tasks } from './tasks.js';
 if (Meteor.isServer) {
   describe('Tasks', () => {
     describe('methods', () => {
-      // const userId = Random.id();
-      // let taskId;
 
       const username ='vivian'
       let taskId, userId;
@@ -41,8 +39,6 @@ if (Meteor.isServer) {
           createdAt: new Date(),
           owner: userId,
           username: 'tmeasday',
-          checked: false,
-          private: false
         });
       });
 
@@ -133,9 +129,6 @@ if (Meteor.isServer) {
        it('cannot insert task if !loggedin', () => {
         const text = "text"
 
-        //cannot use because not userId is not a boolean but a string
-        // notLoggedIn = ! this._id
-
         // Find the internal implementation of the task method so we can
         // test it in isolation
         const insertTask = Meteor.server.method_handlers['tasks.insert'];
@@ -171,7 +164,7 @@ if (Meteor.isServer) {
         setCheckedTask.apply(invocation, [taskId, true]);
 
         // Verify that the method does what we expected
-        assert.equal(Tasks.find(taskId, { $set: { checked: true } }).count(), 1);
+        assert.equal(Tasks.find({ checked: true }).count(), 1);
       });
 
       //write test shows that you cannot setChecked task
@@ -199,7 +192,7 @@ if (Meteor.isServer) {
         }, Meteor.Error, /not.authorized/);
         
         // Verify that the method does what we expected
-        assert.equal(Tasks.findOne(taskId).checked, false);
+        assert.equal(Tasks.find({ checked: true }).count(), 0);
         });
 
        // *******************SETTOPRIVATE****************
@@ -218,7 +211,7 @@ if (Meteor.isServer) {
         setToPrivateTask.apply(invocation, [taskId, true]);
 
         // Verify that the method does what we expected
-        assert.equal(Tasks.find(taskId, { $set: { private: true } }).count(), 1);
+        assert.equal(Tasks.find({ private: true }).count(), 1);
       });
 
         // write test shows that you can cannotsetToPrivate task
@@ -243,7 +236,7 @@ if (Meteor.isServer) {
         }, Meteor.Error, /not.authorized/);
           
         // Verify that the method does what we expected
-        assert.equal(Tasks.findOne(taskId).private, false);
+        assert.equal(Tasks.find({ private: true }).count(), 0);
         });
 
     });
